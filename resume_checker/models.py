@@ -1,10 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
-
-
-class Resume(models.Model):
-    resume = models.FileField(upload_to="resumes/")
 
 
 class JobDescription(models.Model):
@@ -13,3 +10,9 @@ class JobDescription(models.Model):
 
     def __str__(self):
         return self.job_title
+
+
+class Resume(models.Model):
+    job_title = models.ForeignKey(JobDescription, on_delete=models.CASCADE)
+    resume = models.FileField(upload_to="resumes/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)

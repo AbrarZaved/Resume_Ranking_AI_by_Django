@@ -2,7 +2,15 @@ import json
 import pdfplumber
 import spacy
 from groq import Groq
+import environ
+import os
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+env_file = os.path.join(BASE_DIR, ".env")
+environ.Env.read_env(env_file)
 
 def extract_text(file_path):
     text = ""
@@ -13,7 +21,7 @@ def extract_text(file_path):
     return text.strip()
 
 
-API_KEY = "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"
+API_KEY = env("API_KEY")
 
 
 def analyze_resume(text: str, job_description: str) -> dict:
