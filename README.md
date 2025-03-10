@@ -52,13 +52,13 @@ Access the app at **http://127.0.0.1:8000/**
 ## **📂 Project Structure**  
 ```
 Resume_Ranking_AI/
-│── core/                   # Main Django app
+│── Resume_Ranking_AI/      # Main Django app
 │── templates/              # Frontend templates
 │── static/                 # CSS, JS, images
 │── models.py               # Database models
 │── views.py                # Business logic
 │── serializers.py          # API serializers
-│── resume_parser/          # AI resume processing logic
+│── resume_checker/         # AI resume processing logic
 │── requirements.txt        # Dependencies
 │── manage.py               # Django entry point
 ```
