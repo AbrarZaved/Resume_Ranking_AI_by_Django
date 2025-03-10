@@ -63,12 +63,6 @@ Resume_Ranking_AI/
 │── manage.py               # Django entry point
 ```
 
-## **📜 API Endpoints** (if applicable)  
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/upload-resume/` | POST | Uploads and processes a resume |
-| `/api/rank-resumes/` | GET | Returns ranked resumes based on job criteria |
-| `/api/job-description/` | POST | Uploads job description for matching |
 
 ## **📌 Future Enhancements**  
 ✅ AI-based **Resume Summarization**  
