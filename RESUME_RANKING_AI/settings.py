@@ -31,7 +31,12 @@ SECRET_KEY = 'django-insecure-ne$llszj&x9q2kuun@vp6spn*9td-vi_30)y9o)o@lunz$usp^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["ats-resume.onrender.com", "localhost", "*.onrender.com"]
+ALLOWED_HOSTS = [
+    "ats-resume.onrender.com",
+    "localhost",
+    "*.onrender.com",
+    "ats-resume-y5mc.onrender.com",
+]
 CSRF_TRUSTED_ORIGINS = ["https://ats-resume.onrender.com", "http://localhost", "https://*.onrender.com"]
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = True
