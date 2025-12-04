@@ -2,3 +2,5 @@ myenv
 .env
 script.py
 resumes/
+__pycache__/
+*.pyc

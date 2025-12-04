@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-ne$llszj&x9q2kuun@vp6spn*9td-vi_30)y9o)o@lunz$usp^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["resume-checker.onrender.com", "localhost", "*"]
 
 
 # Application definition
