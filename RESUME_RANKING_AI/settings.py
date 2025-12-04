@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from django.conf.global_settings import CSRF_TRUSTED_ORIGINS
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,8 +32,12 @@ SECRET_KEY = 'django-insecure-ne$llszj&x9q2kuun@vp6spn*9td-vi_30)y9o)o@lunz$usp^
 DEBUG = True
 
 ALLOWED_HOSTS = ["ats-resume.onrender.com", "localhost", "*.onrender.com"]
-
-
+CSRF_TRUSTED_ORIGINS = ["https://ats-resume.onrender.com", "http://localhost", "https://*.onrender.com"]
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"  # Enables cookie across sites for HTTPS
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
 # Application definition
 
 INSTALLED_APPS = [
