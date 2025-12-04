@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from resume_checker.forms import ResumeForm
 from resume_checker.models import JobDescription, Resume
 from resume_checker.serializer import JobDescriptionSerializer, ResumeSerializer
-from .analyzer import process_resume
+from .analyzer import process_resume, process_multiple_resumes
 
 
 class JobDescriptionAPI(APIView):
@@ -63,18 +63,69 @@ def index(request):
 
 def check_resume(request):
     if request.method == "POST":
-        form = ResumeForm(request.POST, request.FILES)
         try:
-            if form.is_valid():
-                job_id = request.POST["job_title"]
-                resume_instance = form.save()
-            file_path = resume_instance.resume.path
-            job_desc = JobDescription.objects.get(id=job_id).job_description
-        except Exception as e:
-            print(e)
+            job_id = request.POST.get("job_title")
+            files = request.FILES.getlist("resume")
 
-        data = process_resume(file_path, job_desc)
-        return render(request, "partials/result.html", {"data": data})
+            if not files:
+                return render(
+                    request,
+                    "partials/result.html",
+                    {"error": "No resume files uploaded"},
+                )
+
+            job_desc = JobDescription.objects.get(id=job_id).job_description
+
+            # Process multiple resumes
+            resume_paths = []
+            resume_instances = []
+
+            for file in files:
+                # Create a resume instance for each file
+                resume_instance = Resume.objects.create(
+                    job_title_id=job_id, resume=file
+                )
+                resume_instances.append(resume_instance)
+                resume_paths.append(resume_instance.resume.path)
+
+            # Process all resumes
+            results = process_multiple_resumes(resume_paths, job_desc)
+
+            # Normalize and format scores
+            for result in results:
+                if "rank" in result and not result.get("error"):
+                    rank = result["rank"]
+                    # Convert to float
+                    if isinstance(rank, str):
+                        rank = rank.replace("%", "").strip()
+                    try:
+                        score = float(rank)
+                        # If score is between 0 and 1, convert to percentage
+                        if 0 <= score <= 1:
+                            score = score * 100
+                        # Format with percentage sign
+                        result["rank"] = f"{score:.0f}%"
+                    except (ValueError, TypeError):
+                        result["rank"] = "0%"
+
+            # Sort results by score (descending)
+            def get_score(x):
+                rank = x.get("rank", "0%")
+                if isinstance(rank, str):
+                    return float(rank.replace("%", ""))
+                return float(rank) if rank else 0
+
+            results.sort(key=get_score, reverse=True)
+
+            return render(
+                request,
+                "partials/result.html",
+                {"results": results, "total_resumes": len(results)},
+            )
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return render(request, "partials/result.html", {"error": str(e)})
 
     form = ResumeForm()
     return render(request, "index.html", {"form": form})

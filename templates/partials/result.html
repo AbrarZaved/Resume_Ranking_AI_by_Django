@@ -1,43 +1,236 @@
-<div>
-    <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Resume Analysis</h3>
+<div class="results-container">
+    {% if error %}
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 shadow-md">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3"></i>
+                <div>
+                    <h3 class="text-red-800 font-bold text-lg">Error Occurred</h3>
+                    <p class="text-red-600 mt-1">{{ error }}</p>
+                </div>
+            </div>
+        </div>
+    {% elif results %}
+        <!-- Results Header -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-bar mr-3 text-indigo-600"></i>
+                        Analysis Results
+                    </h3>
+                    <p class="text-gray-600 mt-1">
+                        <span class="font-semibold text-indigo-600">{{ total_resumes }}</span> 
+                        Resume{% if total_resumes > 1 %}s{% endif %} Analyzed
+                    </p>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="sortResults('score')" 
+                            class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-200 transition-all font-semibold">
+                        <i class="fas fa-sort-amount-down"></i>
+                        Sort by Score
+                    </button>
+                    <button onclick="exportToCSV()" 
+                            class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md">
+                        <i class="fas fa-file-csv"></i>
+                        Export CSV
+                    </button>
+                    <button onclick="hideResult()" 
+                            class="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all font-semibold">
+                        <i class="fas fa-times"></i>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <!-- Rank -->
-    <div class="mb-4">
-        <p class="text-lg font-medium text-gray-700">
-            🏅 <span class="text-indigo-600 font-semibold">Match Score:</span> {{ data.rank }}
-        </p>
-    </div>
+        <!-- Results Grid -->
+        <div id="results-grid" class="results-grid">
+            {% for data in results %}
+            <div class="resume-card card-hover bg-white rounded-xl shadow-lg overflow-hidden" data-score="{{ data.rank|default:'0' }}">
+                {% if data.error %}
+                    <!-- Error Card -->
+                    <div class="p-6 bg-red-50">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-bold text-gray-800 text-lg">
+                                <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                Resume #{{ data.resume_number }}
+                            </h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4 truncate" title="{{ data.file_name }}">{{ data.file_name }}</p>
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-4">
+                            <p class="text-red-700 text-sm">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>{{ data.error }}
+                            </p>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Success Card -->
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold opacity-90">Resume #{{ data.resume_number }}</span>
+                            <i class="fas fa-crown text-yellow-300"></i>
+                        </div>
+                        <h4 class="font-bold text-xl mb-2 truncate" title="{{ data.file_name }}">
+                            {{ data.file_name|truncatechars:30 }}
+                        </h4>
+                        <div class="score-badge bg-white text-indigo-600 rounded-full px-6 py-3 inline-flex mt-2">
+                            <i class="fas fa-star mr-2"></i>
+                            {{ data.rank }}
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <!-- Experience -->
+                        <div class="mb-5 pb-5 border-b border-gray-200">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-briefcase text-indigo-600 mr-2"></i>
+                                <span class="text-sm font-semibold text-gray-600">Experience</span>
+                            </div>
+                            <p class="text-lg font-bold text-gray-800">{{ data.experience }}</p>
+                        </div>
 
-    <!-- Skills -->
-    <div class="mb-4">
-        <p class="text-lg font-medium text-gray-700">💡 Key Skills:</p>
-        <div class="flex flex-wrap gap-2">
-            {% for skill in data.skills %}
-                <span class="bg-indigo-100 text-indigo-700 text-sm font-medium px-3 py-1 rounded-lg">✅ {{ skill }}</span>
+                        <!-- Skills -->
+                        <div class="mb-5 pb-5 border-b border-gray-200">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-code text-indigo-600 mr-2"></i>
+                                <span class="text-sm font-semibold text-gray-600">Key Skills</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for skill in data.skills|slice:":6" %}
+                                    <span class="skill-tag bg-indigo-50 text-indigo-700 text-xs font-medium px-3 py-1.5 rounded-full border border-indigo-200">
+                                        {{ skill }}
+                                    </span>
+                                {% endfor %}
+                                {% if data.skills|length > 6 %}
+                                    <span class="skill-tag bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full">
+                                        +{{ data.skills|length|add:"-6" }} more
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Project Categories -->
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-folder-open text-indigo-600 mr-2"></i>
+                                <span class="text-sm font-semibold text-gray-600">Project Categories</span>
+                            </div>
+                            <ul class="space-y-2">
+                                {% for category in data.project_categories|slice:":4" %}
+                                    <li class="flex items-center text-sm text-gray-700">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>
+                                        {{ category }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
-    </div>
-
-    <!-- Experience -->
-    <div class="mb-4">
-        <p class="text-lg font-medium text-gray-700">
-            🏆 <span class="text-indigo-600 font-semibold">Experience:</span> {{ data.experience }} {% if "years" not in data.experience %}years {% else %}{% endif %}
-        </p>
-    </div>
-
-    <!-- Project Categories -->
-    <div class="mb-4">
-        <p class="text-lg font-medium text-gray-700">📂 Relevant Project Categories:</p>
-        <ul class="list-disc pl-5 text-gray-600">
-            {% for category in data.project_categories %}
-                <li class="py-1">📌 {{ category }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <!-- Close Button -->
-    <button onclick="hideResult()"
-        class="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded-lg shadow hover:bg-red-600 transition duration-200">
-        ❌ Close Result
-    </button>
+    {% endif %}
 </div>
+
+<script>
+    let sortOrder = 'desc';
+    
+    function sortResults(criteria) {
+        const grid = document.getElementById('results-grid');
+        const cards = Array.from(document.querySelectorAll('.resume-card'));
+        
+        cards.sort((a, b) => {
+            const scoreA = parseFloat(String(a.dataset.score).replace('%', '')) || 0;
+            const scoreB = parseFloat(String(b.dataset.score).replace('%', '')) || 0;
+            return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+        });
+        
+        sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+        
+        grid.innerHTML = '';
+        cards.forEach(card => grid.appendChild(card));
+        
+        // Visual feedback
+        cards.forEach((card, index) => {
+            card.style.animation = 'fadeIn 0.3s ease';
+            card.style.animationDelay = `${index * 0.05}s`;
+        });
+    }
+    
+    function exportToCSV() {
+        const results = [];
+        const cards = document.querySelectorAll('.resume-card');
+        
+        // CSV Header
+        results.push(['Resume Number', 'File Name', 'Match Score', 'Experience', 'Skills', 'Project Categories']);
+        
+        cards.forEach(card => {
+            const resumeNum = card.querySelector('[class*="Resume #"]')?.textContent?.match(/\d+/)?.[0] || '';
+            const fileName = card.querySelector('[title]')?.getAttribute('title') || 
+                           card.querySelector('h4').textContent.replace('Resume #' + resumeNum, '').trim();
+            const score = card.dataset.score || 'N/A';
+            
+            const experienceEl = card.querySelector('.fa-briefcase')?.parentElement?.nextElementSibling;
+            const experience = experienceEl?.textContent?.trim() || 'N/A';
+            
+            const skills = Array.from(card.querySelectorAll('.skill-tag'))
+                .map(el => el.textContent.trim())
+                .filter(s => !s.startsWith('+'))
+                .join('; ');
+            
+            const categories = Array.from(card.querySelectorAll('.fa-check-circle'))
+                .map(el => el.parentElement.textContent.trim())
+                .join('; ');
+            
+            results.push([resumeNum, fileName, score, experience, skills, categories]);
+        });
+        
+        // Create CSV content
+        const csvContent = results.map(row => 
+            row.map(cell => `"${cell}"`).join(',')
+        ).join('\n');
+        
+        // Download CSV
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `resume_analysis_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show success message
+        showNotification('CSV exported successfully!', 'success');
+    }
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white font-semibold animate-fade-in`;
+        notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+
+<style>
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-10px); }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease;
+    }
+</style>

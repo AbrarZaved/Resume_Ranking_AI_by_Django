@@ -36,8 +36,9 @@ ALLOWED_HOSTS = [
     "localhost",
     "*.onrender.com",
     "ats-resume-y5mc.onrender.com",
+    "127.0.0.1",
 ]
-CSRF_TRUSTED_ORIGINS = ["https://ats-resume.onrender.com", "http://localhost", "https://*.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["https://ats-resume.onrender.com", "http://localhost", "https://*.onrender.com", "http://127.0.0.1"]
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"  # Enables cookie across sites for HTTPS

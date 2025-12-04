@@ -12,6 +12,7 @@ env = environ.Env()
 env_file = os.path.join(BASE_DIR, ".env")
 environ.Env.read_env(env_file)
 
+
 def extract_text(file_path):
     text = ""
     with pdfplumber.open(file_path) as pdf:
@@ -67,3 +68,28 @@ def process_resume(pdf_path, job_description):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
+
+def process_multiple_resumes(resume_paths, job_description):
+    """
+    Process multiple resumes and return a list of analysis results.
+    """
+    results = []
+    for idx, pdf_path in enumerate(resume_paths, 1):
+        try:
+            resume_text = extract_text(pdf_path)
+            analysis = analyze_resume(resume_text, job_description)
+            if analysis:
+                analysis["resume_number"] = idx
+                analysis["file_name"] = os.path.basename(pdf_path)
+                results.append(analysis)
+        except Exception as e:
+            print(f"Error processing {pdf_path}: {e}")
+            results.append(
+                {
+                    "resume_number": idx,
+                    "file_name": os.path.basename(pdf_path),
+                    "error": str(e),
+                }
+            )
+    return results
